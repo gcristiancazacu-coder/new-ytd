@@ -97,7 +97,12 @@ async def process_download(task_id: str, url: str, format_type: str):
             'fragment_retries': 30,
             # Removed restrictive player_client args specific to web
         }
+        
+        # Add headers ONLY if specific cookies aren't used, or let yt-dlp manage them.
+        # Removing manual User-Agent to avoid mismatch with cookies.
+        
         if cookie_file:
+            print(f"[{task_id}] Using cookie file: {cookie_file}")
             base_opts['cookiefile'] = cookie_file
         
         if format_type == "audio":

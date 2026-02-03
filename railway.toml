@@ -1,5 +1,5 @@
 [build]
-dockerfile = "backend/Dockerfile"
+dockerfile = "Dockerfile"
 buildContext = "."
 
 [deploy]

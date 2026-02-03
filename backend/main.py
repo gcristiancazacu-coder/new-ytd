@@ -5,6 +5,8 @@ import yt_dlp
 import os
 import uuid
 import asyncio
+import base64
+import tempfile
 from typing import Dict
 
 app = FastAPI(title="YT Downloader Pro API")
@@ -24,6 +26,26 @@ download_status: Dict[str, dict] = {}
 # Folder descărcări
 DOWNLOAD_FOLDER = "downloads"
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+
+
+def _get_cookie_file() -> str | None:
+    """Return a cookie file path if provided via env vars."""
+    cookie_file = os.getenv("COOKIE_FILE")
+    if cookie_file and os.path.exists(cookie_file):
+        return cookie_file
+
+    cookie_b64 = os.getenv("COOKIE_B64")
+    if cookie_b64:
+        try:
+            decoded = base64.b64decode(cookie_b64)
+            temp_path = os.path.join(tempfile.gettempdir(), "yt_cookies.txt")
+            with open(temp_path, "wb") as f:
+                f.write(decoded)
+            return temp_path
+        except Exception:
+            return None
+
+    return None
 
 
 @app.get("/")
@@ -63,6 +85,7 @@ async def process_download(task_id: str, url: str, format_type: str):
             download_status[task_id]["status"] = "processing"
     
     try:
+        cookie_file = _get_cookie_file()
         base_opts = {
             'outtmpl': f'{DOWNLOAD_FOLDER}/{task_id}.%(ext)s',
             'progress_hooks': [progress_hook],
@@ -83,6 +106,8 @@ async def process_download(task_id: str, url: str, format_type: str):
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             },
         }
+        if cookie_file:
+            base_opts['cookiefile'] = cookie_file
         
         if format_type == "audio":
             # AUDIO: Doar sunet - m4a format

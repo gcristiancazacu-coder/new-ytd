@@ -137,7 +137,11 @@ async def process_download(task_id: str, url: str, format_type: str):
                     
                     print(f"[{task_id}] Downloading VIDEO - format: {format_str}")
                     
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    # Force merge output format to mp4 to avoid codec issues
+                    video_opts = ydl_opts.copy()
+                    video_opts['merge_output_format'] = 'mp4'
+
+                    with yt_dlp.YoutubeDL(video_opts) as ydl:
                         info = ydl.extract_info(url, download=True)
                         filename = ydl.prepare_filename(info)
                         

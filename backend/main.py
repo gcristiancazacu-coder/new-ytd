@@ -68,17 +68,19 @@ async def process_download(task_id: str, url: str, format_type: str):
             'progress_hooks': [progress_hook],
             'noplaylist': True,
             'socket_timeout': 120,
-            'quiet': True,
-            'no_warnings': True,
+            'quiet': False,
+            'no_warnings': False,
             'skip_unavailable_fragments': True,
-            'fragment_retries': 15,
+            'fragment_retries': 30,
             'extractor_args': {
                 'youtube': {
-                    'skip': ['webpage'],
+                    'player_client': ['web'],
                 }
             },
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             },
         }
         

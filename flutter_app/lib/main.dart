@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
-const String defaultServerUrl = 'http://10.0.2.2:8000';
+// Use local IP for physical devices, 10.0.2.2 for emulator
+const String defaultServerUrl = 'http://192.168.1.133:8000';
 
 void main() {
   runApp(const YtDownloaderApp());
@@ -93,7 +94,10 @@ class _DownloadHomePageState extends State<DownloadHomePage> {
         'format_type': _formatType,
       });
 
-      final response = await http.post(uri);
+      final response = await http.post(uri).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw Exception('Server timeout - conectare eșuată'),
+      );
       if (response.statusCode != 200) {
         throw Exception('Eroare server: ${response.statusCode}');
       }
@@ -132,7 +136,10 @@ class _DownloadHomePageState extends State<DownloadHomePage> {
 
     try {
       final uri = _buildUri('/api/progress/$taskId');
-      final response = await http.get(uri);
+      final response = await http.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Timeout citire progres'),
+      );
       if (response.statusCode != 200) {
         throw Exception('Nu pot citi progresul.');
       }
@@ -179,7 +186,10 @@ class _DownloadHomePageState extends State<DownloadHomePage> {
 
     try {
       final uri = _buildUri('/api/download/$taskId');
-      final response = await http.get(uri);
+      final response = await http.get(uri).timeout(
+        const Duration(minutes: 5),
+        onTimeout: () => throw Exception('Timeout descărcare'),
+      );
       if (response.statusCode != 200) {
         throw Exception('Nu pot descărca fișierul.');
       }
